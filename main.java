@@ -9,27 +9,12 @@ import java.sql.SQLException;
  *
  */
 public class main {
-  private static String JDBC_CONNECTION_URL = "jdbc:oracle:thin:MICHAEL/MEDEROS@localhost:1500:MS3";
 
   public static void main(String[] args) throws Exception {
-    Connection connection = getCon();
+    Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/sqlite/MS3.db");
     CSVLoader loader = new CSVLoader(connection);
-    loader.loadCSV("ms3Interview.csv", "data", true);
+    loader.loadCSV("C:\\ms3Interview.csv", "data", true);
     loader.createStatistics();
   }
 
-  private static Connection getCon() {
-    Connection connection = null;
-    try {
-      Class.forName("oracle.jdbc.driver.OracleDriver");
-      connection = DriverManager.getConnection(JDBC_CONNECTION_URL);
-
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-
-    return connection;
-  }
 }
