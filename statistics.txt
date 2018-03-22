@@ -1,0 +1,3 @@
+Number of records received: 6002
+Number of records successful: 4870
+Number of records failed: 1132
