@@ -75,7 +75,7 @@ public class CSVLoader {
       e.printStackTrace();
       throw new Exception("Error occured while executing file. " + e.getMessage());
     }
-    
+
     // Header row of the csv file is taken first to populate key fields
     String[] headerRow = csvReader.readNext();
 
@@ -116,17 +116,17 @@ public class CSVLoader {
       while ((nextLine = csvReader.readNext()) != null) {
 
         if (nextLine != null) {
-          //increment the received count
+          // increment the received count
           lines++;
           int index = 1;
 
-          //check and see if information is missing
+          // check and see if information is missing
           for (String string : nextLine) {
             if (string.equals("")) {
               match = false;
             }
           }
-          //add query to the batch if data is correct
+          // add query to the batch if data is correct
           if (match) {
             for (String string : nextLine) {
               ps.setString(index, string);
@@ -135,22 +135,22 @@ public class CSVLoader {
             ps.addBatch();
             success++;
           } else {
-            //add data to badData if incorrect
+            // add data to badData if incorrect
             badData.add(nextLine);
             fail++;
           }
 
         }
-        //perform query execution before batch size becomes to large for memory
+        // perform query execution before batch size becomes to large for memory
         if (++count % batchSize == 0) {
           ps.executeBatch();
         }
       }
       ps.executeBatch(); // insert remaining records
-      con.commit(); //commit all queries
-      writer.writeAll(badData); //write csv file with badData
+      con.commit(); // commit all queries
+      writer.writeAll(badData); // write csv file with badData
     } catch (Exception e) {
-      con.rollback(); //revert to original state
+      con.rollback(); // revert to original state
       e.printStackTrace();
       throw new Exception(
           "Error occured while loading data from file to database." + e.getMessage());
