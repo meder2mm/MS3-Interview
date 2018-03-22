@@ -28,3 +28,7 @@
   - num of records successful
 
   - num of records failed
+
+# Disclaimer
+
+Some items may have to be formatted to fit the path pointed to by java code in order to get a proper result. MySQL was downloaded onto my computer with corrupted data and as such I was unable to set it up properly within the given time to create a database. Although I did use SQLite to create a database which is included in the repository. All files needed for the project have been included expect for .jar files containing open source libraries.
