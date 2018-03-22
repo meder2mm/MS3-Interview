@@ -59,7 +59,7 @@ public class CSVLoader {
   public void loadCSV(String csvFile, String tableName, boolean truncateBeforeLoad)
       throws Exception {
 
-    String csv = "bad-data-3/22/2018.csv";
+    String csv = "bad-data-3-22-2018.csv";
     CSVReader csvReader = null;
     CSVWriter writer = new CSVWriter(new FileWriter(csv));
     List<String[]> badData = new ArrayList<String[]>();
@@ -138,6 +138,7 @@ public class CSVLoader {
             // add data to badData if incorrect
             badData.add(nextLine);
             fail++;
+            match = true;
           }
 
         }
@@ -198,3 +199,4 @@ public class CSVLoader {
   }
 
 }
+
