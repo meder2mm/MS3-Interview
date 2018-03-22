@@ -1,6 +1,9 @@
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -12,8 +15,9 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * Open source code edited to read a CSV file into a database as well as creating a csv file
- * for data that does not match table description. 
+ * Open source code edited to read a CSV file into a database as well as creating a csv file for
+ * data that does not match table description.
+ * 
  * @author viralpatel.net and Michael Mederos
  * 
  * @version 2 - 3/22/2018
@@ -25,6 +29,9 @@ public class CSVLoader {
   private static final String KEYS_REGEX = "\\$\\{keys\\}";
   private static final String VALUES_REGEX = "\\$\\{values\\}";
 
+  private int lines;
+  private int success;
+  private int fail;
   private Connection connection;
   private char seprator;
 
@@ -68,7 +75,8 @@ public class CSVLoader {
       e.printStackTrace();
       throw new Exception("Error occured while executing file. " + e.getMessage());
     }
-
+    
+    // Header row of the csv file is taken first to populate key fields
     String[] headerRow = csvReader.readNext();
 
     if (headerRow == null) {
@@ -76,25 +84,29 @@ public class CSVLoader {
           "No columns defined in given CSV file." + "Please check the CSV file format.");
     }
 
+    // Question mark string is created to populate query information using wildcard format
     String questionmarks = StringUtils.repeat("?,", headerRow.length);
     questionmarks = (String) questionmarks.subSequence(0, questionmarks.length() - 1);
 
+    // Query is populated with given information from constructors and question marks
     String query = SQL_INSERT.replaceFirst(TABLE_REGEX, tableName);
     query = query.replaceFirst(KEYS_REGEX, StringUtils.join(headerRow, ","));
     query = query.replaceFirst(VALUES_REGEX, questionmarks);
 
+    // Query is printed for error checking
     System.out.println("Query: " + query);
 
     String[] nextLine;
     Connection con = null;
     PreparedStatement ps = null;
     try {
+      // Prepare connection to retrieve queries
       con = this.connection;
       con.setAutoCommit(false);
       ps = con.prepareStatement(query);
 
       if (truncateBeforeLoad) {
-        // delete data from table before loading csv
+        // Delete data from table before loading csv
         con.createStatement().execute("DELETE FROM " + tableName);
       }
 
@@ -103,35 +115,42 @@ public class CSVLoader {
       boolean match = true;
       while ((nextLine = csvReader.readNext()) != null) {
 
-        if (null != nextLine) {
+        if (nextLine != null) {
+          //increment the received count
+          lines++;
           int index = 1;
 
+          //check and see if information is missing
           for (String string : nextLine) {
             if (string.equals("")) {
               match = false;
             }
           }
+          //add query to the batch if data is correct
           if (match) {
             for (String string : nextLine) {
               ps.setString(index, string);
               index++;
             }
             ps.addBatch();
-          }
-          else {
+            success++;
+          } else {
+            //add data to badData if incorrect
             badData.add(nextLine);
+            fail++;
           }
 
         }
+        //perform query execution before batch size becomes to large for memory
         if (++count % batchSize == 0) {
           ps.executeBatch();
         }
       }
       ps.executeBatch(); // insert remaining records
-      con.commit();
-      writer.writeAll(badData);
+      con.commit(); //commit all queries
+      writer.writeAll(badData); //write csv file with badData
     } catch (Exception e) {
-      con.rollback();
+      con.rollback(); //revert to original state
       e.printStackTrace();
       throw new Exception(
           "Error occured while loading data from file to database." + e.getMessage());
@@ -152,6 +171,30 @@ public class CSVLoader {
 
   public void setSeprator(char seprator) {
     this.seprator = seprator;
+  }
+
+  public void createStatistics() throws IOException {
+    BufferedWriter bw = null;
+    try {
+      String statistics = "Number of records received: " + lines + "\n";
+      statistics += "Number of records successful: " + success + "\n";
+      statistics += "Number of records failed: " + fail + "\n";
+
+      File file = new File("statistics.txt");
+
+      if (!file.exists()) {
+        file.createNewFile();
+      }
+
+      FileWriter fw = new FileWriter(file);
+      bw = new BufferedWriter(fw);
+      bw.write(statistics);
+      System.out.println("File written Successfully");
+
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+    bw.close();
   }
 
 }
