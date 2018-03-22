@@ -23,8 +23,8 @@
 
 4. At the end of the process write statistics to a log file
 
-  - # of records received
+  - num of records received
 
-  - # of records successful
+  - num of records successful
 
-  - # of records failed
+  - num of records failed
