@@ -2,7 +2,7 @@ CREATE DATABASE MS3;
 USE MS3;
 DROP TABLE IF EXISTS values;
 CREATE TABLE values (
-    A integer NOT NULL,
+    A text NOT NULL,
     B text NOT NULL,
     C text NOT NULL,
     D text NOT NULL,
