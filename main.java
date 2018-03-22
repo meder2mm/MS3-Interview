@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class main {
 
   public static void main(String[] args) throws Exception {
-    Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/sqlite/MS3.db");
+    Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/MS3.db");
     CSVLoader loader = new CSVLoader(connection);
     loader.loadCSV("C:\\ms3Interview.csv", "data", true);
     loader.createStatistics();
